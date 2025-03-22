@@ -22,7 +22,7 @@ export const servers: ServerType[] = [
       "Natural language query processing",
       "Support for multiple weather data providers",
     ],
-    image: "/placeholder.svg?height=400&width=600&text=Weather+MCP",
+    image: "https://thedatascientist.com/wp-content/uploads/2024/07/weather-data.jpg",
     featured: true,
     serverCode: {
       main: `
@@ -370,7 +370,7 @@ main();
       "SQL query execution via natural language",
       "Database migration support",
     ],
-    image: "/placeholder.svg?height=400&width=600&text=Neon+MCP",
+    image: "https://vercel.com/_next/image?url=https%3A%2F%2Fvercel.com%2Fapi%2Fv1%2Fintegrations%2Fassets%2Foac_3sK3gnG06emjIEVL09jjntDD%2Fimages%2Feb3251ef24052a721a3791e535ac60f555f1ecd0.png&w=3840&q=75",
     featured: true,
     serverCode: {
       main: `
@@ -858,7 +858,7 @@ main();
       "Code search capabilities",
       "GitHub Actions monitoring",
     ],
-    image: "/placeholder.svg?height=400&width=600&text=GitHub+MCP",
+    image: "https://www.bleepstatic.com/content/hl-images/2022/04/08/GitHub__headpic.jpg",
     featured: true,
     serverCode: {
       main: `
@@ -1460,7 +1460,7 @@ main();
       "Multi-calendar support",
       "Timezone handling",
     ],
-    image: "/placeholder.svg?height=400&width=600&text=Calendar+MCP",
+    image: "https://design-milk.com/images/2024/11/2025-Modern-Calendar-Roundup-15-Studio-Hinrichs-Typographic.jpg",
   },
   {
     id: "docs-mcp",
@@ -1481,7 +1481,7 @@ main();
       "Framework-specific guides",
       "Offline documentation access",
     ],
-    image: "/placeholder.svg?height=400&width=600&text=Docs+MCP",
+    image: "https://ebillity.com/wp-content/uploads/2021/07/blog-tt-process-documentation.jpeg",
   },
   {
     id: "analytics-mcp",
@@ -1502,7 +1502,7 @@ main();
       "Audience insights",
       "Campaign performance analysis",
     ],
-    image: "/placeholder.svg?height=400&width=600&text=Analytics+MCP",
+    image: "https://edvancer.in/wp-content/uploads/2022/10/What-is-data-analytics-How-it-can-help-your-career-738x472.jpg",
   },
   {
     id: "translate-mcp",
@@ -1523,7 +1523,7 @@ main();
       "Idiom and slang handling",
       "Technical terminology support",
     ],
-    image: "/placeholder.svg?height=400&width=600&text=Translate+MCP",
+    image: "https://www.shaip.com/wp-content/uploads/2020/12/Blog_Exploring-Natural-Language-Processing-in-Translation.jpg",
   },
   {
     id: "file-mcp",
@@ -1544,7 +1544,7 @@ main();
       "Document preview",
       "File organization assistance",
     ],
-    image: "/placeholder.svg?height=400&width=600&text=File+MCP",
+    image: "https://i.pcmag.com/imagery/roundups/03yy022DDsenwhBBYdxvwDi-3..v1593631883.jpg",
   },
 ]
 
