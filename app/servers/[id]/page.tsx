@@ -1,11 +1,17 @@
+'use client'
+
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowLeft, Download, Star, Calendar, User, Tag } from "lucide-react"
+import { ArrowLeft, Download, Star, Calendar, User, Tag, Info, ExternalLink } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 import { servers } from "@/lib/data"
 import { ServerCodeDisplay } from "@/components/server-code-display"
+import { useEffect, useState } from "react"
 
 interface ServerPageProps {
   params: {
@@ -14,6 +20,28 @@ interface ServerPageProps {
 }
 
 export default function ServerPage({ params }: ServerPageProps) {
+  const [isMobile, setIsMobile] = useState(false)
+  const [activeTab, setActiveTab] = useState("overview")
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const checkIfMobile = () => {
+        setIsMobile(window.innerWidth < 768)
+      }
+      
+      checkIfMobile()
+      
+      if (window.innerWidth < 768) {
+        setActiveTab("overview")
+      } else {
+        setActiveTab("code")
+      }
+      
+      window.addEventListener("resize", checkIfMobile)
+      return () => window.removeEventListener("resize", checkIfMobile)
+    }
+  }, [])
+
   const server = servers.find((s) => s.id === params.id) || {
     id: params.id,
     name: `${params.id} Server`,
@@ -29,123 +57,169 @@ export default function ServerPage({ params }: ServerPageProps) {
     requirements: ["Requirement 1", "Requirement 2"],
     features: ["Feature 1", "Feature 2", "Feature 3"],
     image: `/placeholder.svg?height=400&width=800&text=${params.id}`,
+    serverCode: {
+      main: "",
+      package: "",
+      client: "",
+      types: ""
+    },
   }
 
   // Find similar servers in the same category
   const similarServers = servers.filter((s) => s.category === server.category && s.id !== server.id).slice(0, 4)
 
   return (
-    <div className="container py-10">
+    <div className="container max-w-7xl mx-auto px-4 py-8 md:py-12">
       <Link
         href="/"
-        className="inline-flex items-center gap-1 mb-6 text-sm font-medium text-muted-foreground hover:text-foreground"
+        className="inline-flex items-center gap-2 mb-8 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to servers
       </Link>
 
-      <div className="grid gap-6 lg:grid-cols-3 lg:gap-12">
+      <div className="grid gap-8 lg:grid-cols-3 lg:gap-12">
         <div className="lg:col-span-2">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="outline">{server.category}</Badge>
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-                    <span>{server.rating}</span>
-                    <span className="text-xs">({server.reviews})</span>
-                  </div>
+          <div className="flex flex-col gap-6">
+            <div>
+              <div className="flex items-center gap-2.5 mb-2">
+                <Badge variant="secondary" className="text-xs px-2.5 py-0.5 font-medium">
+                  {server.category}
+                </Badge>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <Star className="h-3.5 w-3.5 fill-primary text-primary" />
+                  <span className="font-medium">{server.rating}</span>
+                  <span className="text-xs">({server.reviews} reviews)</span>
                 </div>
-                <h1 className="text-3xl font-bold">{server.name}</h1>
-                <p className="text-muted-foreground">{server.description}</p>
               </div>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">{server.name}</h1>
+              <p className="text-base text-muted-foreground leading-relaxed">{server.description}</p>
             </div>
 
-            <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+            <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted/20">
               <Image
                 src={server.image || `/placeholder.svg?height=400&width=800&text=${server.name}`}
                 alt={server.name}
                 className="object-cover"
                 fill
+                priority
               />
             </div>
 
-            <div className="flex items-center justify-between py-2 border-y">
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-1">
+            <div className="flex flex-wrap items-center justify-between py-3 border-y gap-y-2">
+              <div className="flex flex-wrap items-center gap-4 text-sm">
+                <div className="flex items-center gap-1.5">
                   <User className="h-4 w-4 text-muted-foreground" />
-                  <span>{server.author}</span>
+                  <span className="text-muted-foreground">{server.author}</span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <Tag className="h-4 w-4 text-muted-foreground" />
-                  <span>v{server.version}</span>
+                  <span className="text-muted-foreground">v{server.version}</span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{server.lastUpdated}</span>
+                  <span className="text-muted-foreground">{server.lastUpdated}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-1 text-sm">
+              <div className="flex items-center gap-1.5 text-sm bg-muted/30 px-3 py-1 rounded-full">
                 <Download className="h-4 w-4 text-muted-foreground" />
-                <span>{server.downloads.toLocaleString()}</span>
+                <span className="font-medium">{server.downloads.toLocaleString()}</span>
               </div>
             </div>
 
-            <Tabs defaultValue="code">
-              <TabsList className="w-full">
-                <TabsTrigger value="code" className="flex-1">
-                  Server Code
-                </TabsTrigger>
-                <TabsTrigger value="overview" className="flex-1">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
+              <TabsList className="w-full grid grid-cols-2 md:grid-cols-3 h-11 bg-muted/50 p-1 rounded-lg">
+                {!isMobile && (
+                  <TabsTrigger 
+                    value="code" 
+                    className="text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow rounded-md h-full"
+                  >
+                    Server Code
+                  </TabsTrigger>
+                )}
+                <TabsTrigger 
+                  value="overview" 
+                  className="text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow rounded-md h-full"
+                >
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="features" className="flex-1">
+                <TabsTrigger 
+                  value="features" 
+                  className="text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow rounded-md h-full"
+                >
                   Features
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="code" className="space-y-4 pt-4">
-                {server.serverCode ? (
-                  <ServerCodeDisplay serverCode={server.serverCode} />
-                ) : (
-                  <div className="text-center py-12 border rounded-md">
-                    <p className="text-muted-foreground">Server code is not available for this MCP server.</p>
-                  </div>
-                )}
-              </TabsContent>
+              {!isMobile && (
+                <TabsContent value="code" className="space-y-6 pt-6 mt-2">
+                  {server.serverCode && (server.serverCode.main || server.serverCode.package || server.serverCode.client) ? (
+                    <ServerCodeDisplay serverCode={server.serverCode} />
+                  ) : (
+                    <Card>
+                      <CardContent className="flex flex-col items-center justify-center py-12">
+                        <div className="rounded-full bg-muted/50 p-3 mb-4">
+                          <Info className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <p className="text-muted-foreground text-center mb-2">Server code is not available for this MCP server.</p>
+                        <p className="text-sm text-muted-foreground/70 text-center max-w-md">
+                          The creator has not provided any code examples or configuration files for this server.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+              )}
 
-              <TabsContent value="overview" className="space-y-4 pt-4">
+              <TabsContent value="overview" className="space-y-8 pt-6 mt-2">
                 <div>
-                  <h2 className="text-xl font-bold mb-2">Description</h2>
-                  <p>{server.longDescription}</p>
+                  <h2 className="text-xl font-semibold mb-4">Description</h2>
+                  <div className="prose prose-gray dark:prose-invert prose-sm max-w-none">
+                    <p className="text-muted-foreground leading-relaxed">{server.longDescription}</p>
+                  </div>
                 </div>
 
+                <Separator />
+
                 <div>
-                  <h2 className="text-xl font-bold mb-2">Requirements</h2>
-                  <ul className="grid gap-2">
+                  <h2 className="text-xl font-semibold mb-4">Requirements</h2>
+                  <ul className="space-y-3">
                     {server.requirements.map((requirement, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <div className="rounded-full bg-primary/20 p-1 mt-1">
+                      <li key={index} className="flex items-start gap-3">
+                        <div className="rounded-full bg-primary/15 p-1 mt-1">
                           <div className="h-2 w-2 rounded-full bg-primary" />
                         </div>
-                        <span>{requirement}</span>
+                        <span className="text-muted-foreground">{requirement}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
+                
+                {isMobile && (
+                  <Card className="bg-muted/10 border-muted/40 mt-6">
+                    <CardContent className="p-4 flex items-start gap-3">
+                      <Info className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-sm mb-1">Desktop View Required</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Server code is only available when viewing on a desktop device.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
 
-              <TabsContent value="features" className="space-y-4 pt-4">
+              <TabsContent value="features" className="space-y-8 pt-6 mt-2">
                 <div>
-                  <h2 className="text-xl font-bold mb-2">Key Features</h2>
-                  <ul className="grid gap-3">
+                  <h2 className="text-xl font-semibold mb-4">Key Features</h2>
+                  <ul className="grid gap-4">
                     {server.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <div className="rounded-full bg-primary/20 p-1 mt-1">
+                      <li key={index} className="flex items-start gap-3">
+                        <div className="rounded-full bg-primary/15 p-1 mt-1">
                           <div className="h-2 w-2 rounded-full bg-primary" />
                         </div>
-                        <span>{feature}</span>
+                        <span className="text-muted-foreground">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -155,92 +229,121 @@ export default function ServerPage({ params }: ServerPageProps) {
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="rounded-lg border p-4">
-            <h2 className="text-lg font-bold mb-4">Server Information</h2>
-            <dl className="space-y-2">
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Author</dt>
-                <dd className="font-medium">{server.author}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Version</dt>
-                <dd className="font-medium">{server.version}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Last Updated</dt>
-                <dd className="font-medium">{server.lastUpdated}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Downloads</dt>
-                <dd className="font-medium flex items-center gap-1">
-                  <Download className="h-4 w-4" />
-                  {server.downloads.toLocaleString()}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Rating</dt>
-                <dd className="font-medium flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-primary text-primary" />
-                  {server.rating}
-                </dd>
-              </div>
-            </dl>
-          </div>
+        <div className="space-y-8">
+          <Card className="overflow-hidden border-muted/60">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Server Information</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <dl className="space-y-4">
+                <div className="flex justify-between items-center py-1.5 border-b border-muted/30 last:border-0">
+                  <dt className="text-sm text-muted-foreground">Author</dt>
+                  <dd className="font-medium text-sm">{server.author}</dd>
+                </div>
+                <div className="flex justify-between items-center py-1.5 border-b border-muted/30 last:border-0">
+                  <dt className="text-sm text-muted-foreground">Version</dt>
+                  <dd className="font-medium text-sm">{server.version}</dd>
+                </div>
+                <div className="flex justify-between items-center py-1.5 border-b border-muted/30 last:border-0">
+                  <dt className="text-sm text-muted-foreground">Last Updated</dt>
+                  <dd className="font-medium text-sm">{server.lastUpdated}</dd>
+                </div>
+                <div className="flex justify-between items-center py-1.5 border-b border-muted/30 last:border-0">
+                  <dt className="text-sm text-muted-foreground">Downloads</dt>
+                  <dd className="font-medium text-sm flex items-center gap-1.5">
+                    <Download className="h-4 w-4" />
+                    {server.downloads.toLocaleString()}
+                  </dd>
+                </div>
+                <div className="flex justify-between items-center py-1.5">
+                  <dt className="text-sm text-muted-foreground">Rating</dt>
+                  <dd className="font-medium text-sm flex items-center gap-1.5">
+                    <Star className="h-4 w-4 fill-primary text-primary" />
+                    {server.rating}
+                  </dd>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
 
-          <div className="rounded-lg border p-4">
-            <h2 className="text-lg font-bold mb-4">Requirements</h2>
-            <ul className="space-y-2">
-              {server.requirements.map((req, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <div className="rounded-full bg-primary/20 p-1 mt-1">
-                    <div className="h-2 w-2 rounded-full bg-primary" />
-                  </div>
-                  <span>{req}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <Card className="overflow-hidden border-muted/60">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Requirements</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <ul className="space-y-3">
+                {server.requirements.map((req, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <div className="rounded-full bg-primary/15 p-1 mt-1">
+                      <div className="h-2 w-2 rounded-full bg-primary" />
+                    </div>
+                    <span className="text-sm text-muted-foreground">{req}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Button variant="outline" className="w-full gap-2 h-11">
+            <Download className="h-4 w-4" />
+            Download Server
+          </Button>
 
           {similarServers.length > 0 && (
-            <div className="rounded-lg border p-4">
-              <h2 className="text-lg font-bold mb-4">Similar Servers</h2>
-              <div className="space-y-3">
-                {similarServers.map((similar) => (
-                  <Link key={similar.id} href={`/servers/${similar.id}`}>
-                    <Card className="overflow-hidden hover:bg-muted/50 transition-colors">
-                      <CardContent className="p-3 flex items-center gap-3">
-                        <div className="relative h-12 w-12 rounded-md overflow-hidden flex-shrink-0">
-                          <Image
-                            src={similar.image || `/placeholder.svg?height=100&width=100&text=${similar.name}`}
-                            alt={similar.name}
-                            className="object-cover"
-                            fill
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-sm truncate">{similar.name}</h3>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-primary text-primary" />
-                              <span>{similar.rating}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Download className="h-3 w-3" />
-                              <span>{similar.downloads.toLocaleString()}</span>
+            <Card className="overflow-hidden border-muted/60">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Similar Servers</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-3">
+                  {similarServers.map((similar) => (
+                    <Link key={similar.id} href={`/servers/${similar.id}`} className="block">
+                      <Card className="overflow-hidden hover:bg-muted/20 transition-colors border-muted/40">
+                        <CardContent className="p-3 flex items-center gap-3">
+                          <div className="relative h-12 w-12 rounded-md overflow-hidden flex-shrink-0 border">
+                            <Image
+                              src={similar.image || `/placeholder.svg?height=100&width=100&text=${similar.name}`}
+                              alt={similar.name}
+                              className="object-cover"
+                              fill
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-sm truncate">{similar.name}</h3>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                              <div className="flex items-center gap-1">
+                                <Star className="h-3 w-3 fill-primary text-primary" />
+                                <span>{similar.rating}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Download className="h-3 w-3" />
+                                <span>{similar.downloads.toLocaleString()}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
+
+          <Card className="bg-primary/5 border-primary/20">
+            <CardContent className="p-4 text-center">
+              <h3 className="font-medium text-sm mb-1">Need Help?</h3>
+              <p className="text-xs text-muted-foreground mb-3">
+                Check out our documentation or join our community for support.
+              </p>
+              <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs h-8">
+                <ExternalLink className="h-3 w-3" />
+                Visit Documentation
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
   )
 }
-
